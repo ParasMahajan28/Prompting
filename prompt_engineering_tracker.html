@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prompt Engineering — Globee × Rolex</title>
+<style>
+  :root {
+    --bg: #080b0a;
+    --panel: #101513;
+    --panel2: #141b17;
+    --line: #26342c;
+    --text: #edf5ef;
+    --muted: #93a59a;
+    --green: #39f58b;
+    --green2: #16c968;
+    --soft: rgba(57,245,139,.10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: radial-gradient(ellipse at top, #102018 0%, var(--bg) 52%);
+    color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1180px; margin: auto; padding: 28px 18px 56px; }
+  header { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:28px; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .logo { width:44px; height:44px; border:1px solid var(--green); border-radius:14px; display:grid; place-items:center; color:var(--green); font-weight:900; box-shadow:0 0 24px #39f58b20; }
+  .eyebrow { color:var(--green); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; font-weight:800; }
+  h1 { margin:3px 0 0; font-size:clamp(1.35rem, 3vw, 2rem); letter-spacing:-.04em; }
+  .sub { color:var(--muted); margin:7px 0 0; font-size:.92rem; }
+  button, input, select { font:inherit; }
+  .btn { border:1px solid var(--line); color:var(--text); background:var(--panel2); border-radius:10px; padding:10px 13px; cursor:pointer; transition:.15s; }
+  .btn:hover { border-color:var(--green); color:var(--green); }
+  .btn.primary { background:var(--green); color:#06110a; border-color:var(--green); font-weight:800; }
+  .btn.primary:hover { background:#78ffad; }
+  .hero { display:grid; grid-template-columns:1.3fr .7fr; gap:16px; margin-bottom:18px; }
+  .panel { background:linear-gradient(145deg, #111814, #0d120f); border:1px solid var(--line); border-radius:18px; padding:20px; }
+  .panel h2 { margin:0 0 8px; font-size:1.08rem; }
+  .muted { color:var(--muted); }
+  .big-number { font-size:2rem; font-weight:850; letter-spacing:-.05em; margin:6px 0; }
+  .progress-track { height:8px; background:#26332b; border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--green2),var(--green)); border-radius:99px; transition:width .25s; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:17px; }
+  .stat { background:#0b100d; border:1px solid #1d2921; padding:12px; border-radius:12px; }
+  .stat strong { display:block; font-size:1.15rem; }
+  .stat span { font-size:.76rem; color:var(--muted); }
+  .toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin:24px 0 14px; }
+  .toolbar h2 { margin:0; font-size:1.18rem; }
+  .toolbar-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .columns { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+  .person { overflow:hidden; }
+  .person-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+  .person-name { display:flex; align-items:center; gap:10px; }
+  .avatar { width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:var(--soft); color:var(--green); font-weight:900; border:1px solid #39f58b40; }
+  .person h3 { margin:0; font-size:1.1rem; }
+  .person .muted { font-size:.82rem; }
+  .person-progress { min-width:88px; text-align:right; font-weight:800; color:var(--green); }
+  .day { margin-top:14px; border:1px solid #233027; border-radius:13px; overflow:hidden; }
+  .day-head { padding:11px 13px; background:#141c17; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  .day-date { font-size:.84rem; font-weight:800; }
+  .day-label { color:var(--muted); font-size:.75rem; margin-top:3px; }
+  .day-count { color:var(--green); font-size:.75rem; white-space:nowrap; }
+  .task-list { padding:4px 12px; }
+  label.task { display:flex; gap:10px; align-items:flex-start; padding:11px 0; border-bottom:1px solid #1b261f; cursor:pointer; font-size:.88rem; line-height:1.4; }
+  label.task:last-child { border-bottom:0; }
+  .task input { appearance:none; flex:0 0 18px; width:18px; height:18px; margin:1px 0 0; border:1.5px solid #53665a; border-radius:5px; background:#0b100d; cursor:pointer; position:relative; }
+  .task input:checked { background:var(--green); border-color:var(--green); }
+  .task input:checked::after { content:"✓"; color:#07130b; font-size:14px; font-weight:1000; position:absolute; left:3px; top:-1px; }
+  .task.done span { color:#819188; text-decoration:line-through; text-decoration-color:#39f58b80; }
+  .tag { display:inline-block; margin-top:5px; font-size:.68rem; padding:3px 7px; border-radius:5px; color:var(--green); background:var(--soft); }
+  .note { margin-top:18px; padding:14px 16px; border:1px dashed #34513d; border-radius:12px; color:var(--muted); font-size:.83rem; line-height:1.5; }
+  .note strong { color:var(--green); }
+  footer { margin-top:28px; text-align:center; color:#607066; font-size:.76rem; }
+  .empty { padding:14px; color:var(--muted); }
+  @media(max-width:760px) { .hero,.columns { grid-template-columns:1fr; } .wrap { padding:20px 12px 40px; } .panel { padding:15px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">PE</div>
+      <div>
+        <div class="eyebrow">Learning mission · 2026</div>
+        <h1>Prompt Engineering Tracker</h1>
+        <p class="sub">Globee × Rolex · Learn it, test it, teach it.</p>
+      </div>
+    </div>
+    <button class="btn" id="resetBtn" type="button">Reset progress</button>
+  </header>
+
+  <section class="hero">
+    <div class="panel">
+      <div class="eyebrow">Mission progress</div>
+      <h2 style="margin-top:8px">Small daily wins. Better AI results.</h2>
+      <p class="muted" style="margin:0">Complete your assigned tasks, then teach your topic to each other.</p>
+      <div class="big-number" id="overallPct">0%</div>
+      <div class="progress-track"><div class="progress-fill" id="overallBar"></div></div>
+      <div class="stats">
+        <div class="stat"><strong id="doneCount">0</strong><span>Tasks completed</span></div>
+        <div class="stat"><strong id="totalCount">0</strong><span>Total tasks</span></div>
+        <div class="stat"><strong id="daysCount">0</strong><span>Study days</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="eyebrow">How to use</div>
+      <h2 style="margin-top:8px">Your daily loop</h2>
+      <p class="muted" style="line-height:1.65;margin-bottom:0">1. Study the concept.<br>2. Write and test 2–3 prompts.<br>3. Save your best result.<br>4. Explain it to your partner.</p>
+      <p class="muted" style="font-size:.8rem;margin-bottom:0">Progress saves in this browser on this device.</p>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <h2>Date-wise task board</h2>
+    <div class="toolbar-actions">
+      <button class="btn" id="exportBtn" type="button">Export progress</button>
+      <button class="btn" id="importBtn" type="button">Import progress</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden />
+    </div>
+  </div>
+
+  <section class="columns">
+    <article class="panel person">
+      <div class="person-head">
+        <div class="person-name"><div class="avatar">G</div><div><h3>Globee</h3><div class="muted">Prompt creation & control</div></div></div>
+        <div class="person-progress" id="globeePct">0%<div class="progress-track" style="margin-top:7px"><div class="progress-fill" id="globeeBar"></div></div></div>
+      </div>
+      <div id="globeeTasks"></div>
+    </article>
+    <article class="panel person">
+      <div class="person-head">
+        <div class="person-name"><div class="avatar">R</div><div><h3>Rolex</h3><div class="muted">Prompt testing & optimization</div></div></div>
+        <div class="person-progress" id="rolexPct">0%<div class="progress-track" style="margin-top:7px"><div class="progress-fill" id="rolexBar"></div></div></div>
+      </div>
+      <div id="rolexTasks"></div>
+    </article>
+  </section>
+
+  <div class="note"><strong>Shared progress tip:</strong> HTML on GitHub Pages does not sync checkboxes between different devices by itself. Use <em>Export progress</em> to share a JSON backup, then <em>Import progress</em> on the other device. For live automatic syncing, a shared database/login setup would be needed.</div>
+  <footer>Built for Globee & Rolex · Keep the prompts. Improve the results.</footer>
+</div>
+<script>
+const plan = [
+  { date:"2026-10-20", label:"Day 1 · Foundations", g:[
+    ["Understand what a prompt is and why wording changes results","Learn"],
+    ["Write 3 versions of one prompt: vague, clear, detailed","Practice"],
+    ["Identify task, context, goal and output format in a prompt","Practice"]
+  ], r:[
+    ["Test one vague prompt and one detailed prompt on the same AI","Experiment"],
+    ["Compare the answers and note what improved","Analyze"],
+    ["Create a simple checklist for judging AI answers","Practice"]
+  ]},
+  { date:"2026-10-21", label:"Day 2 · Prompt structure", g:[
+    ["Learn role, task, context, constraints and output format","Learn"],
+    ["Build a reusable prompt template using those parts","Build"],
+    ["Use the template for a study or research task","Practice"]
+  ], r:[
+    ["Take 3 weak prompts and rewrite them more clearly","Optimize"],
+    ["Test how adding constraints changes the answer","Experiment"],
+    ["Make a checklist for missing context and ambiguity","Build"]
+  ]},
+  { date:"2026-10-22", label:"Day 3 · Examples & instructions", g:[
+    ["Learn zero-shot and few-shot prompting","Learn"],
+    ["Make a prompt that includes 2 examples of the desired output","Build"],
+    ["Test format instructions: table, bullets and JSON-style output","Practice"]
+  ], r:[
+    ["Compare zero-shot vs few-shot results on one task","Experiment"],
+    ["Check whether the AI follows the requested format","Verify"],
+    ["Write down when examples help and when they do not","Analyze"]
+  ]},
+  { date:"2026-10-23", label:"Day 4 · Precision & control", g:[
+    ["Write prompts with clear limits and success criteria","Learn"],
+    ["Practice asking the AI to state assumptions and missing info","Practice"],
+    ["Create a prompt for a specific, measurable result","Build"]
+  ], r:[
+    ["Find ambiguity in 3 prompts and explain the risk","Analyze"],
+    ["Check an AI answer for unsupported claims","Verify"],
+    ["Improve a prompt until the answer meets a defined checklist","Optimize"]
+  ]},
+  { date:"2026-10-24", label:"Day 5 · Iteration", g:[
+    ["Practice improving a prompt after reviewing its first answer","Practice"],
+    ["Use follow-up prompts to fix gaps without restarting","Practice"],
+    ["Save a before-and-after prompt example","Deliverable"]
+  ], r:[
+    ["Use a scorecard to rate an answer for accuracy and usefulness","Build"],
+    ["Run 3 prompt revisions and compare results","Experiment"],
+    ["Record which revision made the biggest improvement","Deliverable"]
+  ]},
+  { date:"2026-10-25", label:"Day 6 · Complex tasks", g:[
+    ["Break a complex task into smaller prompt steps","Learn"],
+    ["Build a prompt chain: plan, draft, review, final","Build"],
+    ["Try the chain on a mini project","Practice"]
+  ], r:[
+    ["Test whether splitting a task improves consistency","Experiment"],
+    ["Check each stage for missing details or errors","Verify"],
+    ["Suggest improvements to Globee's prompt chain","Peer review"]
+  ]},
+  { date:"2026-10-26", label:"Day 7 · Research & verification", g:[
+    ["Write a research prompt that requests sources and uncertainty","Build"],
+    ["Practice asking for facts separately from assumptions","Practice"],
+    ["Make a checklist for source quality","Deliverable"]
+  ], r:[
+    ["Verify key claims against reliable original sources","Verify"],
+    ["Check source dates and whether sources support the claim","Practice"],
+    ["Create a fact-checking prompt template","Deliverable"]
+  ]},
+  { date:"2026-10-27", label:"Day 8 · Different AI models", g:[
+    ["Run the same task on two different AI models","Experiment"],
+    ["Adapt the prompt to each model's strengths and limits","Optimize"],
+    ["Save the best version for each model","Deliverable"]
+  ], r:[
+    ["Compare models for accuracy, clarity and instruction-following","Analyze"],
+    ["Identify where each model needs extra context","Analyze"],
+    ["Create a simple model-comparison scorecard","Deliverable"]
+  ]},
+  { date:"2026-10-28", label:"Day 9 · Real-world practice", g:[
+    ["Create a study-help prompt with level, language and format","Build"],
+    ["Create a writing or creative-work prompt","Build"],
+    ["Create a coding/debugging prompt with test requirements","Build"]
+  ], r:[
+    ["Test each prompt on a real task and note failure points","Experiment"],
+    ["Check results rather than assuming generated output is correct","Verify"],
+    ["Improve the three prompts using test results","Optimize"]
+  ]},
+  { date:"2026-10-29", label:"Day 10 · Final challenge", g:[
+    ["Choose one complex real-world task and define success criteria","Plan"],
+    ["Write the final master prompt and run it","Execute"],
+    ["Present the prompt, result and lessons to Rolex","Teach"]
+  ], r:[
+    ["Independently solve the same task with your own prompt","Execute"],
+    ["Compare both outputs against the same scorecard","Evaluate"],
+    ["Teach Globee your strongest optimization techniques","Teach"]
+  ]},
+  { date:"2026-10-30", label:"Day 11 · Joint review", g:[
+    ["Review both prompt libraries and remove weak duplicates","Review"],
+    ["Choose 5 reusable prompts for a shared prompt library","Deliverable"]
+  ], r:[
+    ["Review both prompt libraries and add verification notes","Review"],
+    ["Write a short guide: how to improve any prompt","Deliverable"]
+  ]}
+];
+const STORE_KEY = "globee-rolex-prompt-tracker-v1";
+let checked = {};
+try { checked = JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); } catch { checked = {}; }
+const dateFmt = new Intl.DateTimeFormat("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+function key(person, date, index){ return `${person}|${date}|${index}`; }
+function renderPerson(person, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  plan.forEach(day => {
+    const tasks = day[person];
+    const section = document.createElement("section");
+    section.className = "day";
+    const done = tasks.filter((_,i)=>checked[key(person,day.date,i)]).length;
+    const head = document.createElement("div");
+    head.className = "day-head";
+    const left = document.createElement("div");
+    const date = document.createElement("div"); date.className="day-date"; date.textContent=dateFmt.format(new Date(day.date+"T12:00:00"));
+    const label = document.createElement("div"); label.className="day-label"; label.textContent=day.label;
+    left.append(date,label);
+    const count = document.createElement("div"); count.className="day-count"; count.textContent=`${done}/${tasks.length} done`;
+    head.append(left,count);
+    const list = document.createElement("div"); list.className="task-list";
+    tasks.forEach(([title,tag],i)=>{
+      const row = document.createElement("label"); row.className="task"+(checked[key(person,day.date,i)]?" done":"");
+      const cb = document.createElement("input"); cb.type="checkbox"; cb.checked=!!checked[key(person,day.date,i)];
+      cb.addEventListener("change",()=>{
+        checked[key(person,day.date,i)] = cb.checked;
+        localStorage.setItem(STORE_KEY,JSON.stringify(checked));
+        render();
+      });
+      const textWrap = document.createElement("div");
+      const titleEl = document.createElement("span"); titleEl.textContent=title;
+      const tagEl = document.createElement("div"); tagEl.className="tag"; tagEl.textContent=tag;
+      textWrap.append(titleEl,tagEl); row.append(cb,textWrap); list.append(row);
+    });
+    section.append(head,list); container.append(section);
+  });
+}
+function totals(person){
+  let total=0, done=0;
+  plan.forEach(day=>day[person].forEach((_,i)=>{total++;if(checked[key(person,day.date,i)])done++;}));
+  return {total,done,pct:total?Math.round(done/total*100):0};
+}
+function render(){
+  renderPerson("g","globeeTasks"); renderPerson("r","rolexTasks");
+  const g=totals("g"), r=totals("r"), all={total:g.total+r.total,done:g.done+r.done};
+  const pct=all.total?Math.round(all.done/all.total*100):0;
+  document.getElementById("globeePct").firstChild.textContent=g.pct+"%";
+  document.getElementById("rolexPct").firstChild.textContent=r.pct+"%";
+  document.getElementById("globeeBar").style.width=g.pct+"%";
+  document.getElementById("rolexBar").style.width=r.pct+"%";
+  document.getElementById("overallPct").textContent=pct+"%";
+  document.getElementById("overallBar").style.width=pct+"%";
+  document.getElementById("doneCount").textContent=all.done;
+  document.getElementById("totalCount").textContent=all.total;
+  document.getElementById("daysCount").textContent=plan.length;
+}
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  if(confirm("Reset every checkbox on this browser? This cannot be undone unless you exported a backup.")){
+    checked={}; localStorage.removeItem(STORE_KEY); render();
+  }
+});
+document.getElementById("exportBtn").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify({app:"Globee × Rolex Prompt Engineering Tracker",version:1,exportedAt:new Date().toISOString(),checked},null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="prompt-tracker-progress.json"; a.click(); URL.revokeObjectURL(url);
+});
+document.getElementById("importBtn").addEventListener("click",()=>document.getElementById("importFile").click());
+document.getElementById("importFile").addEventListener("change",async e=>{
+  const file=e.target.files[0]; if(!file)return;
+  try{
+    const data=JSON.parse(await file.text());
+    if(!data.checked || typeof data.checked!=="object") throw new Error("Invalid file");
+    checked={...checked,...data.checked}; localStorage.setItem(STORE_KEY,JSON.stringify(checked)); render();
+    alert("Progress imported!");
+  }catch{alert("Could not import that file. Please choose a valid progress JSON export.");}
+  e.target.value="";
+});
+render();
+</script>
+</body>
+</html>
